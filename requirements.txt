@@ -1,0 +1,4 @@
+beautifulsoup4==4.6.3
+Js2Py==0.59
+lxml==4.2.5
+requests==2.19.1
