@@ -19,11 +19,11 @@ try:
 except Exception as error:
     raise error
 
-
-NAME ={'xpath': ['//div[@itemprop="name"]//text()']}
-CATEGORY = {'xpath': ['//ol[contains(@id="breadcrumb-list")]//a//text()']}
-ORIGINAL_PRICE = {'xpath': ['[contains(@class, "pb-current-price")]//span//text()']}
-DESCRIPTION = {'xpath': ['//div[@id="long-description"]']}
+# NAME ={'xpath': ['//div[@itemprop="name"]//text()']}
+NAME = {'xpath': ['//h1[(@class, "heading-5 v-fw-regular")]//text()']}
+# CATEGORY = {'xpath': ['//ol[contains(@id="breadcrumb-list")]//a//text()']}
+# ORIGINAL_PRICE = {'xpath': ['[contains(@class, "pb-current-price")]//span//text()']}
+# DESCRIPTION = {'xpath': ['//div[@id="long-description"]']}
 
 # COUNTRY = {'xpath': ['//span[@itemprop="availableAtOrFrom"]//text()']}
 # PRICES = {'xpath': ['//span[@id="prcIsum"]//text()', '//span[@id="mm-saleDscPrc"]']}
@@ -35,14 +35,16 @@ DESCRIPTION = {'xpath': ['//div[@id="long-description"]']}
 
 
 class BestbuyScraper(Scraper):
-
+    print('0')
     def __init__(self, url, raw_response):
+        print('a')
         self.url = url
         self.page_text = None
         self.page_content = None
         self.html_content = None
 
         if raw_response['status_code'] == 200:
+            print('b')
             self.page_text = raw_response['content'].text
             self.page_content = raw_response['content'].content
             self.html_content = html.fromstring(self.page_content)
@@ -51,9 +53,12 @@ class BestbuyScraper(Scraper):
         super().__init__(url)
 
     def __repr__(self):
+        print('c')
         return '%s(url="%s")' % (self.__class__.__name__, self.url)
 
     def use_x_path(self, path):
+        print('d' , path)
+
         """
         function to enable scrap by using xpath method.
 
@@ -72,9 +77,12 @@ class BestbuyScraper(Scraper):
         :return dict of {'value': ['this is baz'], 'method': 'regex'}
         """
         try:
+            print('e')
             out = re.findall(reg, self.page_text)
         except:
+            print('f')
             out = None
+        print('g')
         return {'value': out, 'method': 'regex'}
 
     def scrap(self, **kwargs):
@@ -93,6 +101,7 @@ class BestbuyScraper(Scraper):
                     for xpath in data['xpath']:
                         output = self.use_x_path(xpath)
                         if output['value']:
+                            print('h')
                             return output
 
             if 'regex' in data:
@@ -100,8 +109,9 @@ class BestbuyScraper(Scraper):
                     for regex in data['regex']:
                         output = self.use_regex(regex)
                         if output['value']:
+                            print('i')
                             return output
-
+        print('j')
         return {'value': self.RESPONSE_DATA[field], 'method': None}
 
     def get_html(self, field_name):
@@ -122,6 +132,7 @@ class BestbuyScraper(Scraper):
                                              .replace('<script', '<scripta style="display:none"')\
                                              .replace('</script>', '</scripta>')
                 out_html_string += html_tostring
+            print('k')
             return out_html_string
         except Exception as error:
             return ''
@@ -137,31 +148,6 @@ class BestbuyScraper(Scraper):
             return raw['value']
         return ' '.join(''.join(raw['value']).split()) if raw else None
 
-    def get_additional_json(self):
-        """
-        major data for bestbuy
-        """
-        # using this `xpath` we got an error when the text having
-        # double quote inside double quotes, eg: "Lorem Ipsum dolor" ismet"
-        # xpath_query = '//script[@id="tb-djs-wml-redux-state"]//text()'
-        # scripts = self.html_content.xpath(xpath_query)
-
-        soup = BeautifulSoup(self.page_text, 'html.parser')
-        script = soup.find('script', {'id': 'tb-djs-wml-redux-state'})
-
-        try:
-            additional_json = json.loads(script.text)
-        except Exception:
-            additional_json = {}
-
-        # assign into self variable `self.additional_json`
-        # so, this `self.get_additional_json()` fucntion not to be called many times
-        # we call this function only once first call in `self.product_info()`
-        self.additional_json = additional_json
-
-        return additional_json
-
-
     def find_price(self, price):
         price = str(price).replace(',', '') if price else ''
         match = re.search(r'[0-9.]+', price)
@@ -169,13 +155,6 @@ class BestbuyScraper(Scraper):
             price = match.group()
         return float(price) if price else None
 
-    def get_product_info(self):
-        """
-            s
-        """
-        # fist call to assign `self.additional_json`
-        json_data = self.get_additional_json()
-        return json_data.get('productBasicInfo', {})
     # ----------------------------
     # BEGIN OF ABSTRACT FUNCTIONS
     # ----------------------------
@@ -262,7 +241,7 @@ class BestbuyScraper(Scraper):
         """
         function to get category of product.
         :param `field_name` is field for 'CATEGORY'
-        :return string of category
+        :return string of categoryhttps://www.bestbuy.com/site/cricket-wireless-samsung-galaxy-sol-3-with-16gb-memory-prepaid-cell-phone-silver/6215340.p?skuId=6215340
         """
         field, data = field_name, eval(field_name)
         raw = self.scrap(field=field, data=data)
@@ -319,7 +298,7 @@ class BestbuyScraper(Scraper):
         return 0
 
     def get_weight_unit(self):
-        """
+        """https://www.bestbuy.com/site/cricket-wireless-samsung-galaxy-sol-3-with-16gb-memory-prepaid-cell-phone-silver/6215340.p?skuId=6215340
         function to get weight unit, eg: 'gram', 'kg', 'pounds'
         :return string of weight unit, default 'gram'
         """
@@ -331,6 +310,7 @@ class BestbuyScraper(Scraper):
         :return integer, float or None
         """
         pass
+
 
     def get_dimension_height(self):
         """
@@ -352,6 +332,7 @@ class BestbuyScraper(Scraper):
         :return integer, float or None
         """
         pass
+
 
     def get_dimension_unit(self):
         """
@@ -433,9 +414,10 @@ if __name__ == '__main__':
     try:
         url = 'https://www.bestbuy.com/site/cricket-wireless-samsung-galaxy-sol-3-with-16gb-memory-prepaid-cell-phone-silver/6215340.p?skuId=6215340'
         if len(sys.argv) > 1:
+            print('1')
             url = sys.argv[-1]
-
         raw_response = ScrapRequest().get(url)
+        print('2')
         scraper = BestbuyScraper(url, raw_response)
         response = scraper.get_result()
     except Exception as error:

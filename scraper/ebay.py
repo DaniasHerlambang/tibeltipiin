@@ -53,6 +53,7 @@ class EbayScraper(Scraper):
         return '%s(url="%s")' % (self.__class__.__name__, self.url)
 
     def use_x_path(self, path):
+        print('d' , path)
         """
         function to enable scrap by using xpath method.
 
